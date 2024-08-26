@@ -3,6 +3,8 @@ import App from '../App';
 import Home from '../pages/Home/Home';
 import AboutUs from '../pages/AboutUs/AboutUs';
 import ContactUs from '../pages/ContactUs/ContactUs';
+import AdminDashboardLayout from '../layouts/AdminDashboardLayout';
+import Dashboard from '../pages/Admin/Dashboard/Dashboard';
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +22,21 @@ export const router = createBrowserRouter([
       {
         path: '/contact',
         element: <ContactUs />,
+      },
+    ],
+  },
+  // Admin Routes
+  {
+    path: '/',
+    element: <AdminDashboardLayout />,
+    children: [
+      // {
+      //   index: true,
+      //   element: <Home />,
+      // },
+      {
+        path: '/admindashboard',
+        element: <Dashboard />,
       },
     ],
   },

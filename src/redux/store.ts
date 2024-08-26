@@ -1,12 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
-// ...
+import facilitiesReducer from './features/facilities/facilitiesSlice';
+import { facilitiesApi } from './features/facilities/facilitiesApi';
 
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    facilities: facilitiesReducer,
+    [facilitiesApi.reducerPath]: facilitiesApi.reducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(facilitiesApi.middleware),
 });
 
-// Infer the `RootState`,  `AppDispatch`, and `AppStore` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch;
-export type AppStore = typeof store;
