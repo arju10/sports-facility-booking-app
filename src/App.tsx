@@ -1,11 +1,11 @@
-import TopNavigationBar from "./pages/Shared/TopNavigationBar";
+import TopNavigationBar from './pages/Shared/TopNavigationBar';
 
 const App = () => {
   return (
     <>
-    <TopNavigationBar/>
+      <TopNavigationBar />
     </>
-  ) 
+  );
 };
 
 export default App;
