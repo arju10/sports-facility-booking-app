@@ -1,11 +1,11 @@
-import TopNavigationBar from './pages/Shared/TopNavigationBar';
+import MainLayout from './layouts/MainLayout';
 
-const App = () => {
+function App() {
   return (
-    <>
-      <TopNavigationBar />
-    </>
+    <div className=" min-h-screen w-full ">
+      <MainLayout />
+    </div>
   );
-};
+}
 
 export default App;

@@ -1,28 +1,13 @@
-import React from 'react';
+import { Outlet } from 'react-router-dom';
 import TopNavigationBar from '../pages/Shared/TopNavigationBar';
-import Footer from '../pages/Shared/Footer';
+import ScrollToTopButton from '../pages/Shared/ScrollToTopButton';
 
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout = () => {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Navbar */}
-      <header>
-        <TopNavigationBar />
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-grow">
-        <div className="container mx-auto p-4">{children}</div>
-      </main>
-
-      {/* Footer */}
-      <footer>
-        <Footer />
-      </footer>
+    <div>
+      <TopNavigationBar />
+      <Outlet />
+      <ScrollToTopButton />
     </div>
   );
 };
