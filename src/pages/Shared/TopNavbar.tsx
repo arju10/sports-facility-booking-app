@@ -15,7 +15,7 @@ const TopNavbar = ({ collapsed, setCollapsed }) => {
 
   return (
     <div className="w-full shadow-lg ">
-      <div className="navbar">
+      <div className="navbar ">
         <div className="flex-none lg:flex items-center space-x-4 ">
           <button
             onClick={() => setCollapsed(!collapsed)}
@@ -146,7 +146,7 @@ const TopNavbar = ({ collapsed, setCollapsed }) => {
             {isProfileDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-50">
                 <Link
-                  to="/register"
+                  to="/signup"
                   className="block px-4 py-2 hover:bg-gray-200"
                 >
                   Register

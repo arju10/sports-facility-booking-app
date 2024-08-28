@@ -1,4 +1,4 @@
-import FeaturedFacilities from './Facilities/FeaturedFacilities';
+import Footer from '../Shared/Footer';
 import HeroSection from './HeroSection/HeroSection';
 import HowItWorks from './HowItWorks/HowItWorks';
 import Testimonials from './Testimonials/Testimonials';
@@ -7,9 +7,9 @@ const Home = () => {
   return (
     <div>
       <HeroSection />
-      <FeaturedFacilities />
       <HowItWorks />
       <Testimonials />
+      <Footer />
     </div>
   );
 };

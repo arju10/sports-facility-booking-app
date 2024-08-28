@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import Copyright from '../pages/Shared/Copyright';
 import TopNavbar from '../pages/Shared/TopNavbar';
+import TopNavigationBar from '../pages/Shared/TopNavigationBar';
 
 const AdminDashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -11,16 +12,16 @@ const AdminDashboardLayout = () => {
 
   const items = [
     {
-      key: 'dashboard',
+      key: 'adminDashboard',
       //   icon: <DesktopOutlined />,
       label: 'Dashboard',
-      to: '/',
+      to: '/adminDashboard',
     },
     {
-      key: 'requisition',
+      key: 'Sports Facilities',
       //   icon: <ShoppingCartOutlined />,
-      label: 'Requisition',
-      to: '/requisition',
+      label: 'Facility',
+      to: '/facility',
     },
     {
       key: 'RequisitionAuthorization',
@@ -145,14 +146,14 @@ const AdminDashboardLayout = () => {
   return (
     <div className="flex min-h-screen">
       <div
-        className={`flex flex-col bg-gray-800 text-white ${collapsed ? 'w-16' : 'w-64'} transition-width duration-200`}
+        className={`flex flex-col bg-gray-800 text-white ${collapsed ? 'w-16' : 'w-64'} transition-width duration-200 `}
       >
         {/* <div className="flex items-center justify-center p-4">
           <Link to="/" className="btn btn-ghost normal-case text-xl">
             GOINNOVIOR
           </Link>
         </div> */}
-        <nav className="flex-1 overflow-y-auto">
+        <nav className="flex-1 overflow-y-auto ">
           <ul className="menu p-2">
             {items.map((item) =>
               item.subMenu ? (
@@ -198,9 +199,11 @@ const AdminDashboardLayout = () => {
           </ul>
         </nav>
       </div>
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 ">
         <TopNavbar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <div className="overflow-y-auto">
+
+        {/* <TopNavigationBar /> */}
+        <div className="overflow-y-auto ">
           <main className="flex-1 p-6">
             <Outlet />
           </main>

@@ -5,6 +5,10 @@ import AboutUs from '../pages/AboutUs/AboutUs';
 import ContactUs from '../pages/ContactUs/ContactUs';
 import AdminDashboardLayout from '../layouts/AdminDashboardLayout';
 import Dashboard from '../pages/Admin/Dashboard/Dashboard';
+import SignUp from '../pages/screens/SignUp/SignUp';
+import Login from '../pages/screens/Login/Login';
+import FacilitiesSlice from '../redux/features/facilities/facilitiesSlice';
+import FacilitiesList from '../pages/Admin/Facilities/FacilitiesList';
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +27,18 @@ export const router = createBrowserRouter([
         path: '/contact',
         element: <ContactUs />,
       },
+      {
+        path: 'signup',
+        element: <SignUp />,
+      },
+      {
+        path: 'login',
+        element: <Login />,
+      },
+      {
+        path: 'user-profile',
+        element: <Login />,
+      },
     ],
   },
   // Admin Routes
@@ -37,6 +53,10 @@ export const router = createBrowserRouter([
       {
         path: '/admindashboard',
         element: <Dashboard />,
+      },
+      {
+        path: '/facility',
+        element: <FacilitiesList />,
       },
     ],
   },
