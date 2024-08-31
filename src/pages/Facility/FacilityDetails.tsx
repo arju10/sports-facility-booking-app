@@ -7,9 +7,10 @@ const FacilityDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [facility, setFacility] = useState<Facility | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDay, setSelectedDay] = useState<string>('');
-  const [startTime, setStartTime] = useState<string>('');
-  const [endTime, setEndTime] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [todayDate, setTodayDate] = useState<string>(
+    new Date().toISOString().split('T')[0],
+  );
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -17,10 +18,7 @@ const FacilityDetails: React.FC = () => {
         const response = await axios.get(
           `http://localhost:5500/api/facility/${id}`,
         );
-        console.log('API Response:', response);
-        // Adjust this line based on the actual response structure
         const facilityData = response.data.data; // Adjust based on the response structure
-        console.log('Facility Data:', facilityData);
         if (facilityData) {
           setFacility(facilityData);
         } else {
@@ -35,17 +33,31 @@ const FacilityDetails: React.FC = () => {
     fetchFacility();
   }, [id]);
 
+  const getDayOfWeek = (date: string) => {
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayIndex = new Date(date).getDay();
+    return daysOfWeek[dayIndex];
+  };
+
+  const selectedDayOfWeek = selectedDate ? getDayOfWeek(selectedDate) : '';
+
+  const filteredSchedules = selectedDayOfWeek
+    ? facility?.schedule.filter((avail) => avail.day === selectedDayOfWeek)
+    : facility?.schedule;
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.value;
+    if (selected < todayDate) {
+      setSelectedDate('');
+      setError('Please select today or a future date.');
+    } else {
+      setSelectedDate(selected);
+      setError(null);
+    }
+  };
+
   if (error) return <div>{error}</div>;
   if (!facility) return <div>Loading...</div>;
-
-  const isAvailable = facility.schedule.some(
-    (avail) =>
-      avail.day === selectedDay &&
-      startTime &&
-      endTime &&
-      avail.startTime <= startTime &&
-      avail.endTime >= endTime,
-  );
 
   return (
     <div className="container mx-auto px-4 pt-20">
@@ -65,54 +77,46 @@ const FacilityDetails: React.FC = () => {
           <div className="mt-4">
             <input
               type="date"
-              placeholder="Select day"
-              value={selectedDay}
-              onChange={(e) => setSelectedDay(e.target.value)}
+              placeholder="Select date"
+              value={selectedDate}
+              onChange={handleDateChange}
               className="p-2 border border-gray-300 rounded"
+              min={todayDate} // Disable past dates
             />
-            <input
-              type="time"
-              placeholder="Start time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              className="p-2 border border-gray-300 rounded"
-            />
-            <input
-              type="time"
-              placeholder="End time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              className="p-2 border border-gray-300 rounded"
-            />
-            <Link
-              to={
-                isAvailable
-                  ? `/book/${facility._id}?day=${selectedDay}&startTime=${startTime}&endTime=${endTime}`
-                  : '#'
-              }
-              className={`mt-4 inline-block px-4 py-2 ${isAvailable ? 'bg-blue-500' : 'bg-gray-500'} text-white rounded`}
-            >
-              {isAvailable ? 'Book Now' : 'Not Available'}
-            </Link>
           </div>
+
           {/* Render Schedule Information */}
           <div className="mt-8">
             <h2 className="text-xl font-semibold">Schedule</h2>
-            {facility.schedule.length > 0 ? (
+            {error ? (
+              <p className="text-red-600">{error}</p>
+            ) : filteredSchedules && filteredSchedules.length > 0 ? (
               <ul className="mt-2">
-                {facility.schedule.map((avail, index) => (
+                {filteredSchedules.map((avail, index) => (
                   <li
                     key={index}
-                    className="border border-gray-300 p-2 mb-2 rounded"
+                    className="border border-gray-300 p-2 mb-2 rounded flex justify-between items-center"
                   >
-                    <p className="font-bold">{avail.day}</p>
-                    <p className="text-gray-600">From: {avail.startTime}</p>
-                    <p className="text-gray-600">To: {avail.endTime}</p>
+                    <div>
+                      <p className="font-bold">{avail.day}</p>
+                      <p className="text-gray-600">From: {avail.startTime}</p>
+                      <p className="text-gray-600">To: {avail.endTime}</p>
+                    </div>
+                    <Link
+                      to={`/book/${facility._id}?day=${avail.day}`}
+                      className={`px-4 py-2 ${selectedDayOfWeek === avail.day ? 'bg-blue-500' : 'bg-gray-500'} text-white rounded`}
+                    >
+                      {selectedDayOfWeek === avail.day
+                        ? 'Book Now'
+                        : 'Unavailable'}
+                    </Link>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-600 mt-2">No schedule available.</p>
+              <p className="text-gray-600 mt-2">
+                No schedule available for the selected date.
+              </p>
             )}
           </div>
         </div>
