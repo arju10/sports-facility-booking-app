@@ -1,146 +1,270 @@
+// src/pages/BookingPage.tsx
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
 import { Facility } from '../../redux/features/facilities/types';
+import Modal from '../../components/Modal/Modal';
 
 const BookingPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const [facility, setFacility] = useState<Facility | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
-  const [startTime, setStartTime] = useState<string>('');
-  const [endTime, setEndTime] = useState<string>('');
+  const [formData, setFormData] = useState({
+    date: '',
+    name: '',
+    day: '',
+    startTime: '',
+    endTime: '',
+  });
+  const [filteredSchedule, setFilteredSchedule] = useState<
+    { day: string; startTime: string; endTime: string }[] | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Get today's date in YYYY-MM-DD format
+  const todayDate = new Date().toISOString().split('T')[0];
+
   useEffect(() => {
-    const fetchFacility = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:5500/api/facility/${id}`,
-        );
-        console.log(response);
-        setFacility(response.data.data);
-      } catch (err) {
-        setError('Error fetching facility details');
-      }
-    };
+    if (location.state && location.state.facility) {
+      const facilityData = location.state.facility as Facility;
+      setFacility(facilityData);
+      setFormData((prevData) => ({
+        ...prevData,
+        name: facilityData.name, // Set the name from facility data
+        day: facilityData.schedule[0]?.day || '',
+      }));
+    }
+  }, [location.state]);
 
-    fetchFacility();
-  }, [id]);
-
-  const checkAvailability = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5500/api/facility/check-availability`,
-        {
-          params: { date: selectedDate, facilityId: id },
-        },
+  useEffect(() => {
+    if (facility && formData.date) {
+      const selectedDayOfWeek = getDayOfWeek(formData.date);
+      const availableSchedule = facility.schedule.filter(
+        (sched) => sched.day === selectedDayOfWeek,
       );
-      setAvailableSlots(response.data.availableSlots);
-    } catch (err) {
-      setError('Error checking availability');
+
+      if (availableSchedule.length > 0) {
+        setFilteredSchedule(availableSchedule);
+      } else {
+        setFilteredSchedule(null);
+      }
     }
+  }, [facility, formData.date]);
+
+  const getDayOfWeek = (date: string) => {
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayIndex = new Date(date).getDay();
+    return daysOfWeek[dayIndex];
   };
 
-  const handleBooking = async () => {
-    // Here you'd handle booking logic, including payment integration.
-    // This is a placeholder for demonstration.
+  const validateTimes = () => {
+    if (!filteredSchedule) return true;
+
+    const selectedSchedule = filteredSchedule.find(
+      (sched) => sched.day === formData.day,
+    );
+
+    if (selectedSchedule) {
+      const startTime = new Date(`1970-01-01T${formData.startTime}:00Z`);
+      const endTime = new Date(`1970-01-01T${formData.endTime}:00Z`);
+      const scheduleStartTime = new Date(
+        `1970-01-01T${selectedSchedule.startTime}:00Z`,
+      );
+      const scheduleEndTime = new Date(
+        `1970-01-01T${selectedSchedule.endTime}:00Z`,
+      );
+
+      if (
+        startTime < scheduleStartTime ||
+        endTime > scheduleEndTime ||
+        startTime >= endTime
+      ) {
+        setError(
+          'Start time and end time must be within the scheduled hours and end time must be after start time.',
+        );
+        return false;
+      }
+    }
+    setError(null);
+    return true;
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateTimes()) return; // Ensure times are valid before submitting
     try {
-      // Assume we send a booking request here.
-      console.log('Booking details:', {
-        date: selectedDate,
-        startTime,
-        endTime,
-        facilityId: id,
-      });
-      // Navigate to confirmation or show a success message
-      navigate(`/confirmation`);
-    } catch (err) {
-      setError('Error completing the booking');
+      const response = await axios.post(
+        'http://localhost:5500/api/bookings',
+        formData,
+      );
+      // Handle success
+      console.log('Booking successful:', response.data);
+      setIsModalOpen(false);
+      navigate('/'); // Redirect after booking
+    } catch (error) {
+      console.error('Error booking facility:', error);
     }
   };
-
-  if (error) return <div>{error}</div>;
-  if (!facility) return <div>Loading...</div>;
 
   return (
-    <div className="container mx-auto px-4 pt-20">
-      <div className="flex flex-col md:flex-row gap-6">
-        <img
-          src={facility.imageUrl}
-          alt={facility.name}
-          className="w-full md:w-1/2 h-64 object-cover"
-        />
-        <div className="md:w-1/2">
-          <h1 className="text-2xl font-bold">{facility.name}</h1>
-          <p className="text-gray-600">Location: {facility.location}</p>
-          <p className="text-gray-600">
-            Price per Hour: ${facility.pricePerHour}
-          </p>
-          <p className="mt-4">{facility.description}</p>
+    <div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        {facility && (
+          <>
+            <h2 className="text-xl font-semibold">Book Facility</h2>
 
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold">Check Availability</h2>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="p-2 border border-gray-300 rounded"
-            />
-            <button
-              onClick={checkAvailability}
-              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded"
-            >
-              Check Availability
-            </button>
-
-            {availableSlots.length > 0 ? (
-              <div className="mt-4">
-                <h3 className="text-lg font-semibold">Available Slots</h3>
-                <ul>
-                  {availableSlots.map((slot, index) => (
-                    <li
-                      key={index}
-                      className="border border-gray-300 p-2 mb-2 rounded"
-                    >
-                      <p className="font-bold">
-                        {slot.startTime} - {slot.endTime}
-                      </p>
+            <div className="mt-4 mb-6">
+              <h3 className="text-lg font-semibold">Facility Schedule</h3>
+              <ul className="list-disc ml-5 mt-2">
+                {facility.schedule.length > 0 ? (
+                  facility.schedule.map((sched, index) => (
+                    <li key={index} className="mb-1">
+                      <strong>{sched.day}</strong>: {sched.startTime} -{' '}
+                      {sched.endTime}
                     </li>
-                  ))}
-                </ul>
-                <div className="mt-4">
-                  <input
-                    type="time"
-                    placeholder="Start Time"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                  />
-                  <input
-                    type="time"
-                    placeholder="End Time"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    className="ml-4 p-2 border border-gray-300 rounded"
-                  />
-                  <button
-                    onClick={handleBooking}
-                    className="ml-4 px-4 py-2 bg-green-500 text-white rounded"
-                  >
-                    Book Now
-                  </button>
-                </div>
+                  ))
+                ) : (
+                  <li>No schedules available</li>
+                )}
+              </ul>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-4">
+              <div className="mb-4">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Facility Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  readOnly
+                  className="mt-1 p-2 border border-gray-300 rounded bg-gray-100 cursor-not-allowed"
+                />
               </div>
-            ) : (
-              <p className="text-gray-600 mt-2">
-                No slots available for the selected date.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="date"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Date
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  className="mt-1 p-2 border border-gray-300 rounded"
+                  min={todayDate} // Allow only today or future dates
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="day"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Schedule Day
+                </label>
+                <select
+                  id="day"
+                  name="day"
+                  value={formData.day}
+                  onChange={handleChange}
+                  className="mt-1 p-2 border border-gray-300 rounded"
+                  required
+                >
+                  {filteredSchedule && filteredSchedule.length > 0 ? (
+                    filteredSchedule.map((sched, index) => (
+                      <option key={index} value={sched.day}>
+                        {sched.day}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">Not Available</option>
+                  )}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="startTime"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Start Time
+                </label>
+                <input
+                  type="time"
+                  id="startTime"
+                  name="startTime"
+                  value={formData.startTime}
+                  onChange={handleChange}
+                  className="mt-1 p-2 border border-gray-300 rounded"
+                  min={
+                    filteredSchedule && filteredSchedule.length > 0
+                      ? filteredSchedule[0].startTime
+                      : ''
+                  }
+                  max={
+                    filteredSchedule && filteredSchedule.length > 0
+                      ? filteredSchedule[0].endTime
+                      : ''
+                  }
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="endTime"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  End Time
+                </label>
+                <input
+                  type="time"
+                  id="endTime"
+                  name="endTime"
+                  value={formData.endTime}
+                  onChange={handleChange}
+                  className="mt-1 p-2 border border-gray-300 rounded"
+                  min={
+                    filteredSchedule && filteredSchedule.length > 0
+                      ? filteredSchedule[0].startTime
+                      : ''
+                  }
+                  max={
+                    filteredSchedule && filteredSchedule.length > 0
+                      ? filteredSchedule[0].endTime
+                      : ''
+                  }
+                  required
+                />
+              </div>
+              {error && <p className="text-red-600">{error}</p>}
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Pay Amount {0}
+              </button>
+            </form>
+          </>
+        )}
+      </Modal>
     </div>
   );
 };

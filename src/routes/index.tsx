@@ -33,8 +33,12 @@ export const router = createBrowserRouter([
         path: '/facility/details/:id',
         element: <FacilityDetails />,
       },
+      // {
+      //   path: '/booking',
+      //   element: <BookingPage />,
+      // },
       {
-        path: '/bookingPage',
+        path: '/book/:id',
         element: <BookingPage />,
       },
       {
