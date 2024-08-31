@@ -3,7 +3,6 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import Copyright from '../pages/Shared/Copyright';
 import TopNavbar from '../pages/Shared/TopNavbar';
-import TopNavigationBar from '../pages/Shared/TopNavigationBar';
 
 const AdminDashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -21,7 +20,7 @@ const AdminDashboardLayout = () => {
       key: 'Sports Facilities',
       //   icon: <ShoppingCartOutlined />,
       label: 'Facility',
-      to: '/facility',
+      to: '/admin/facilities',
     },
     {
       key: 'RequisitionAuthorization',

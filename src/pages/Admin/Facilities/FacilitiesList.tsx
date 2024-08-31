@@ -82,11 +82,34 @@ const FacilitiesList: React.FC = () => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="table-auto w-full border-collapse border border-gray-300 table-pin-rows able-pin-cols">
+      <div>
+        <h1 className="text-4xl text-center">Facilities Lists</h1>
+      </div>
+      <div className="">
+        <Link to={`/create`}>
+          <button className="btn  btn-sm px-6 font-semibold text-lg bg-accent text-white">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+              />
+            </svg>
+            Add
+          </button>
+        </Link>
+      </div>
+      <table className="table-auto w-full border-collapse border border-gray-300 table-pin-rows able-pin-cols table-sm">
         <thead className="bg-gradient-to-r from-blue-500 to-purple-600 text-white ">
           <tr>
             <th className="p-3 text-lg font-semibold border border-gray-300">
-              {' '}
               {/* Margin for columns */}
               <label>
                 <input
@@ -215,7 +238,7 @@ const FacilitiesList: React.FC = () => {
                         </td>
                         <td className="p-3 border border-gray-300">
                           <div className="flex gap-5">
-                            <Link to={'/:id'}>
+                            <Link to={`/facilities/delete/${facility._id}`}>
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -230,7 +253,7 @@ const FacilitiesList: React.FC = () => {
                                 />
                               </svg>
                             </Link>
-                            <Link to={'/:id'}>
+                            <Link to={`/facilities/edit/${facility._id}`}>
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -280,7 +303,7 @@ const FacilitiesList: React.FC = () => {
                       </td>
                       <td className="p-3 border border-gray-300">
                         <div className="flex gap-5">
-                          <Link to={'/:id'}>
+                          <Link to={`/facilities/delete/${facility._id}`}>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
@@ -295,7 +318,7 @@ const FacilitiesList: React.FC = () => {
                               />
                             </svg>
                           </Link>
-                          <Link to={'/:id'}>
+                          <Link to={`/facilities/edit/${facility._id}`}>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
